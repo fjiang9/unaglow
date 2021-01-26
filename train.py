@@ -36,7 +36,7 @@ from torch.utils.data.distributed import DistributedSampler
 
 from torch.utils.data import DataLoader
 from glow import WaveGlow, WaveGlowLoss
-from mel2samp import Mel2Samp
+from data import SC09_WAV
 
 def load_checkpoint(checkpoint_path, model, optimizer):
     assert os.path.isfile(checkpoint_path)
@@ -90,7 +90,7 @@ def train(num_gpus, rank, group_name, output_directory, epochs, learning_rate,
                                                       optimizer)
         iteration += 1  # next iteration is iteration + 1
 
-    trainset = Mel2Samp(**data_config)
+    trainset = SC09_WAV(**data_config)
     # =====START: ADDED FOR DISTRIBUTED======
     train_sampler = DistributedSampler(trainset) if num_gpus > 1 else None
     # =====END:   ADDED FOR DISTRIBUTED======
@@ -116,13 +116,11 @@ def train(num_gpus, rank, group_name, output_directory, epochs, learning_rate,
     # ================ MAIN TRAINNIG LOOP! ===================
     for epoch in range(epoch_offset, epochs):
         print("Epoch: {}".format(epoch))
-        for i, batch in enumerate(train_loader):
+        for i, audio in enumerate(train_loader):
             model.zero_grad()
 
-            mel, audio = batch
-            mel = torch.autograd.Variable(mel.cuda())
             audio = torch.autograd.Variable(audio.cuda())
-            outputs = model((mel, audio))
+            outputs = model(audio)
 
             loss = criterion(outputs)
             if num_gpus > 1:

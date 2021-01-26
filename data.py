@@ -9,6 +9,41 @@ import torch
 import torchvision.transforms as transforms
 import glob
 
+import random
+import librosa
+from scipy.io.wavfile import read
+
+MAX_WAV_VALUE = 32768.0
+
+
+
+class SC09_WAV(Dataset):
+    def __init__(self, folder, segment_length):
+        self.files = glob.glob(os.path.join(folder, '*.wav'))
+        self.segment_length = segment_length
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        # sampling_rate, data = read(self.files[idx])
+        # audio = torch.from_numpy(data).float()
+
+        data, _ = librosa.load(self.files[idx], sr=16000)
+        audio = torch.from_numpy(librosa.util.normalize(data)).float()
+
+        # Take segment
+        if audio.size(0) >= self.segment_length:
+            max_audio_start = audio.size(0) - self.segment_length
+            audio_start = random.randint(0, max_audio_start)
+            audio = audio[audio_start:audio_start + self.segment_length]
+        else:
+            audio = torch.nn.functional.pad(audio, (0, self.segment_length - audio.size(0)), 'constant').data
+
+        return audio
+
+
+
 
 class SpokenDigits(Dataset):
     """Melspectrogram dataset"""
