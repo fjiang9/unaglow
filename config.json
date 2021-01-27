@@ -1,0 +1,34 @@
+{
+    "train_config": {
+        "fp16_run": false,
+        "output_directory": "checkpoints",
+        "epochs": 30000,
+        "learning_rate": 1e-4,
+        "sigma": 1.0,
+        "iters_per_checkpoint": 2000,
+        "batch_size": 12,
+        "seed": 1234,
+        "checkpoint_path": "",
+        "with_tensorboard": false
+    },
+    "data_config": {
+        "folder": "/home/neil/fei/data/sc09/train",
+        "segment_length": 16000
+    },
+    "dist_config": {
+        "dist_backend": "nccl",
+        "dist_url": "tcp://localhost:54321"
+    },
+
+    "waveglow_config": {
+        "n_flows": 12,
+        "n_group": 8,
+        "n_early_every": 4,
+        "n_early_size": 2,
+        "WN_config": {
+            "n_layers": 5,
+            "n_channels": 128,
+            "kernel_size": 3
+        }
+    }
+}
